@@ -174,7 +174,7 @@ color: rgb(255,255,255);</string>
             </font>
            </property>
            <property name="text">
-            <string>ECG Miner</string>
+            <string>ECGMiner</string>
            </property>
           </widget>
          </item>
@@ -597,6 +597,9 @@ padding: 4px;</string>
                     <property name="text">
                      <string>RP at Left</string>
                     </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
                    </widget>
                   </item>
                   <item>
@@ -611,7 +614,7 @@ padding: 4px;</string>
                      <string>RP at Right</string>
                     </property>
                     <property name="checked">
-                     <bool>true</bool>
+                     <bool>false</bool>
                     </property>
                    </widget>
                   </item>
@@ -755,7 +758,7 @@ padding: 0px;</string>
                   <number>100</number>
                  </property>
                  <property name="value">
-                  <number>5000</number>
+                  <number>2000</number>
                  </property>
                 </widget>
                </item>
