@@ -2,10 +2,9 @@
 
 The increase in computing power, together with the popularization of algorithms to analyse bioelectrical signals, encourages the computer science community to design and implement software that serves as a support for medical community. 
 
-In this repository we present ECGMiner: A Flexible Software for Accurately Digitizing ECG. The tool works with different ECG formats of 10 seconds duration (25mm/s).
+In this repository we present ECGMiner: A Flexible Software for Accurately Digitizing ECG. The tool works with different ECG formats of 10 seconds duration (25 mm/s).
 
 ![ecg](https://user-images.githubusercontent.com/68826642/189548326-acfaa335-b87a-4d5b-b4b9-b0f778e90d3b.PNG)
-
 
 ## Setup
 1. Git clone this repository
