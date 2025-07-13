@@ -1,5 +1,6 @@
 # Standard library imports
-from typing import Iterable, Tuple
+from collections import defaultdict
+from typing import Iterable, List, Tuple
 
 # Third-party imports
 import numpy as np
@@ -63,7 +64,7 @@ class Postprocessor:
         trace = self.__get_trace(ecg_crop, signals, ref_pulses)
         return (data, trace)
 
-    def __segment(
+    def __segment0(
         self, raw_signals: Iterable[Iterable[Point]]
     ) -> Tuple[Iterable[Iterable[Point]], Iterable[Tuple[int, int]]]:
         """
@@ -78,6 +79,9 @@ class Postprocessor:
             list with the points of each of the signals of each lead and list with
             the reference pulses of each ECG row.
         """
+
+       
+
         INI, MID, END = (0, 1, 2)
         LIMIT = min([len(signal) for signal in raw_signals])
         PIXEL_EPS = 5
@@ -130,6 +134,85 @@ class Postprocessor:
             for i in range(len(raw_signals))
         ]
         return (signals, ref_pulses)
+
+    def __segment(
+        self, raw_signals: Iterable[Iterable[Point]]
+    ) -> Tuple[Iterable[Iterable[Point]], Iterable[Tuple[int, int]]]:
+        """
+        Segments the raw signals, removing the digital reference pulses and identifying
+        the 0mV and 1mV y-coordinate levels.
+
+        Args:
+            raw_signals (Iterable[Iterable[Point]]): ECG signals with digital reference pulses.
+
+        Returns:
+            Tuple[Iterable[Iterable[Point]], Iterable[Tuple[int, int]]]: 
+                - Cleaned ECG signals (without digital pulses).
+                - List of tuples (y_0mV, y_1mV) per signal.
+        """
+
+        PIXEL_EPS = 5  # tolerance in y-coord for flat level
+        MIN_PULSE_WIDTH = 20  # required k points to consider a valid level
+
+        ref_pulses = []
+        cleaned_signals = []
+
+        for signal in raw_signals:
+            points = list(signal)
+            if self.__rp_at_right:
+                points = points[::-1]  # Scan right to left
+
+            # --- Paso 1: Detectar cuántos valores consecutivos valen 0mV ---
+            y_0mV = points[0].y
+            k = 1
+            for i in range(1, len(points)):
+                if abs(points[i].y - y_0mV) < PIXEL_EPS:
+                    k += 1
+                else:
+                    break  # termina la secuencia de 0mV
+
+            # --- Paso 2: Detectar valor de 1mV (siguiente secuencia plana) ---
+            y_1mV = 0
+            count = 1
+            in_sequence = False
+            min_pulse_width = max(10, 3*k)
+
+            for i in range(k + 1, len(points)):
+                if abs(points[i].y - points[i - 1].y) < PIXEL_EPS:
+                    count += 1
+                    
+                    if count == min_pulse_width and y_1mV == 0:
+                        y_1mV = points[i].y
+                        in_sequence = True
+                else:
+                    if in_sequence:
+                        end_1mV = i  # aquí termina la secuencia de 1mV
+                        break
+                    count = 1
+            else:
+                end_1mV = len(points)  # si nunca se rompe (toda la señal es plana)
+
+            # --- Paso 3: Avanzar k puntos más desde el final de la secuencia 1mV ---
+            cut_index = min(end_1mV + k, len(points))
+            cleaned = points[cut_index:]
+
+            # --- Guardar resultados ---
+            cleaned_signals.append(cleaned)
+            ref_pulses.append((y_0mV, y_1mV))
+        
+        # Compute median difference between 0mV and 1mV coordinates
+        diffs = [pulse[0] - pulse[1] for pulse in ref_pulses]
+        median_diff = int(np.median(diffs))
+
+        median_diff = max(median_diff, 10)
+
+        # print(raw_signals[0][0:50])
+        # print(median_diff)
+        # print(ref_pulses)
+        # Keep 0mV constant, but compute 1mV as 0mV minus the median diff
+        ref_pulses = [(pulse[0], pulse[0] - median_diff) for pulse in ref_pulses]
+        #print(ref_pulses)
+        return cleaned_signals, ref_pulses
 
     def __vectorize(
         self,

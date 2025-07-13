@@ -41,7 +41,7 @@ class Image:
         if file_extension == ".pdf":
             try:
                 buffer = io.BytesIO()
-                pdf = convert_from_path(path)
+                pdf = convert_from_path(path, dpi = 150)
                 pdf[0].save(buffer, format="png")
                 buffer.seek(0)
                 img_arr = np.frombuffer(buffer.getvalue(), dtype=np.uint8)

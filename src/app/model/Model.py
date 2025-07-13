@@ -15,7 +15,7 @@ class Model:
         # Settings
         self.__layout = (3, 4)
         self.__rhythm = Lead.II
-        self.__rp_at_right = True
+        self.__rp_at_right = False
         self.__cabrera = False
         self.__ocr = False
         self.__outpath = None

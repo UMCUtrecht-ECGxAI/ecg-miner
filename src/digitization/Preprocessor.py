@@ -52,6 +52,8 @@ class Preprocessor:
         ### splitting b,g,r channels
         ecg = ecg.copy()
         ecg.to_BGR()
+
+
         # Find edges with Canny operator
         edges = cv.Canny(ecg.data, 50, 200)
         # Suzuki's contour tracing algorithm
@@ -65,12 +67,73 @@ class Preprocessor:
         ]
         rects = [cv.boundingRect(p) for p in polygons]
 
+        # min_area = 0.05 * ecg.width * ecg.height  # Only draw rectangles larger than 5% of image area
+        # colors = [(0, 255, 0), (0, 0, 255)]  # Alternate between green and red
+        # color_idx = 0
+        # for x, y, w, h in rects:
+        #     if w * h >= min_area:
+        #         cv.rectangle(ecg.data, (x, y), (x + w, y + h), colors[color_idx % len(colors)], 2)
+        #         color_idx += 1
+        # ecg.save("ecg_rects.png")
+
+
+        # rects = self.__filter_large_rectangles(rects, ecg.width, ecg.height)
+        # rects = self.__merge_overlapping_rectangles(rects)
+        
+
+        
+        
         # Get largest contour
         sorted_rects = sorted(rects, key=lambda x: x[2] * x[3], reverse=True)
         largest_rect = sorted_rects[0]
         x, y, w, h = largest_rect
         rect = Rectangle(Point(x, y), Point(x + w, y + h))
         return rect
+
+    def __filter_large_rectangles(self, rects, image_width, image_height, min_area_ratio=0.05):
+        """
+        Elimina rectángulos cuya área sea menor a un porcentaje del área total de la imagen.
+
+        Args:
+            rects (List[Tuple[int, int, int, int]]): Lista de rectángulos (x, y, w, h)
+            image_width (int): Ancho de la imagen
+            image_height (int): Alto de la imagen
+            min_area_ratio (float): Área mínima como proporción del total (por defecto 0.10 = 10%)
+
+        Returns:
+            List[Tuple[int, int, int, int]]: Rectángulos filtrados
+        """
+        min_area = min_area_ratio * image_width * image_height
+        filtered = [r for r in rects if r[2] * r[3] >= min_area]
+        return filtered
+
+
+    def __merge_overlapping_rectangles(self, rects):
+        """
+        Fusiona rectángulos que se solapan exactamente (sin márgenes de proximidad).
+
+        Args:
+            rects (List[Tuple[int, int, int, int]]): Lista de rectángulos (x, y, w, h)
+
+        Returns:
+            List[Tuple[int, int, int, int]]: Lista de rectángulos fusionados
+        """
+        if not rects:
+            return []
+
+        # Determinar tamaño mínimo de la imagen necesaria
+        max_x = max(x + w for x, y, w, h in rects)
+        max_y = max(y + h for x, y, w, h in rects)
+
+        canvas = np.zeros((max_y + 1, max_x + 1), dtype=np.uint8)
+
+        for x, y, w, h in rects:
+            cv.rectangle(canvas, (x, y), (x + w, y + h), 255, -1)
+
+        contours, _ = cv.findContours(canvas, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+        merged_rects = [cv.boundingRect(c) for c in contours]
+
+        return merged_rects
 
     def __gridline_removal(self, ecg: Image) -> Image:
         """

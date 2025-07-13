@@ -37,7 +37,7 @@ class View(QMainWindow):
         # Load GUI and icons
         loadUi(UI_PATH + "gui.ui", self)
         self.setWindowIcon(QIcon(UI_PATH + "logo.ico"))
-        self.setWindowTitle("ECG Miner")
+        self.setWindowTitle("ECGMiner")
         self.icon_lbl.setPixmap(QPixmap(UI_PATH + "logo.ico"))
         self.browse_bttn.setIcon(QIcon(UI_PATH + "browse.png"))
         self.outpath_bttn.setIcon(QIcon(UI_PATH + "outpath.png"))

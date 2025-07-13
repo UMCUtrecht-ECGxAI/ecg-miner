@@ -8,13 +8,6 @@ In this repository we present ECGMiner: A Flexible Software for Accurately Digit
 
 
 ## Setup
-
-NOTE: If you have file corruption on your PC you may have problems with the installation, alternatively you can download the executable directly if you find it easier :)
-https://drive.google.com/drive/folders/1i5fh099kBr0-DWrGKGFFww6UvoYyATaG?usp=sharing
-
-
-Alternatively, follow the steps below to generate it:
-
 1. Git clone this repository
     ```
     git clone https://github.com/adofersan/ecg-miner.git
@@ -59,7 +52,9 @@ Alternatively, follow the steps below to generate it:
     Install it in "C:\Program Files\Tesseract-OCR\tesseract.exe"
     ```
 
-8. Execute the .exe
+9. (Optional) Install poppler to read PDF files correctly. Follow the [RECOMMENDATIONS OF THE ORIGINAL AUTHOR](https://github.com/Belval/pdf2image).
+
+10. Execute the .exe
 
 ## ECG image corpus
 
