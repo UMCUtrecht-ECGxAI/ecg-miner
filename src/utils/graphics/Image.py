@@ -2,6 +2,9 @@
 from __future__ import annotations
 import copy
 import io
+import sys
+
+sys.path.insert(1, "ecg-miner/src/")
 from os.path import splitext
 from typing import ClassVar, Iterable, Sequence, Tuple
 
@@ -41,7 +44,7 @@ class Image:
         if file_extension == ".pdf":
             try:
                 buffer = io.BytesIO()
-                pdf = convert_from_path(path, dpi = 150)
+                pdf = convert_from_path(path, dpi=150)
                 pdf[0].save(buffer, format="png")
                 buffer.seek(0)
                 img_arr = np.frombuffer(buffer.getvalue(), dtype=np.uint8)
@@ -54,9 +57,7 @@ class Image:
         if self.__data is None or pdf_except:
             raise FileNotFoundError(f'File "{path}" does not exist')
 
-    def __getitem__(
-        self, index: Sequence
-    ) -> Iterable[Iterable[int | Iterable[int]]]:
+    def __getitem__(self, index: Sequence) -> Iterable[Iterable[int | Iterable[int]]]:
         """
         Get an slice of image data.
 
@@ -191,14 +192,10 @@ class Image:
             threshold (int): Threshold to apply to the image.
             value (int): Value to set pixels greater or equal than threshold.
         """
-        _, self.__data = cv.threshold(
-            self.__data, thres, value, cv.THRESH_BINARY
-        )
+        _, self.__data = cv.threshold(self.__data, thres, value, cv.THRESH_BINARY)
         self.to_GRAY()
 
-    def line(
-        self, p1: Point, p2: Point, color: Tuple[int, int, int], thickness: int
-    ):
+    def line(self, p1: Point, p2: Point, color: Tuple[int, int, int], thickness: int):
         """
         Creates a line in the image.
 

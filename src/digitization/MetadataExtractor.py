@@ -1,24 +1,28 @@
 # Standard library imports
 import os
 import re
+import sys
 
+sys.path.insert(1, "ecg-miner/src/")
 # Third-party imports
 from pytesseract import pytesseract, TesseractNotFoundError
 
 # Application-specific imports
 from utils.graphics.Image import Image
 from utils.error.DigitizationError import DigitizationError
+
+
 class MetadataExtractor:
     """
     OCR to extract metadata from an ECG.
     """
-    
+
     def __init__(self):
         """
         Initialization of the Metadata OCR.
         """
         pass
-    
+
     def extract_metadata(self, ecg: Image) -> str:
         """
         Extract the metadata of an ECG.
@@ -35,7 +39,7 @@ class MetadataExtractor:
         TESSERACT_PATH: str = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
         metadata = ""
         # Path for Windows
-        if os.name == 'nt':
+        if os.name == "nt":
             pytesseract.tesseract_cmd = TESSERACT_PATH
         try:
             metadata = pytesseract.image_to_string(ecg.data)

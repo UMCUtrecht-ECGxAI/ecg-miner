@@ -2,7 +2,8 @@
 from os.path import dirname, abspath
 import os
 import sys
-sys.path.insert(1, dirname(abspath(__file__)))
+
+sys.path.insert(1, "ecg-miner/src/")
 
 # Third-party imports
 from PyQt5.QtWidgets import QApplication

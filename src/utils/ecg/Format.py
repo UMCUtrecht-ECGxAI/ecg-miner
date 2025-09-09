@@ -1,9 +1,13 @@
 # Standard library imports
+import sys
+
+sys.path.insert(1, "ecg-miner/src/")
 from dataclasses import dataclass
 from typing import Iterable, ClassVar
 
 # Application-specific imports
 from utils.ecg.Lead import Lead
+
 
 @dataclass(frozen=True)
 class Format:
@@ -26,7 +30,7 @@ class Format:
         Lead.V5,
         Lead.V6,
     ]
-    
+
     CABRERA: ClassVar[Iterable[str]] = [
         Lead.aVL,
         Lead.I,

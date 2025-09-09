@@ -1,6 +1,8 @@
 # Standard library imports
 from typing import Tuple
+import sys
 
+sys.path.insert(1, "ecg-miner/src/")
 # Third-party imports
 import cv2 as cv
 import numpy as np
@@ -53,7 +55,6 @@ class Preprocessor:
         ecg = ecg.copy()
         ecg.to_BGR()
 
-
         # Find edges with Canny operator
         edges = cv.Canny(ecg.data, 50, 200)
         # Suzuki's contour tracing algorithm
@@ -62,8 +63,7 @@ class Preprocessor:
         )
         # Bound rectangles
         polygons = [
-            cv.approxPolyDP(c, 0.01 * cv.arcLength(c, True), True)
-            for c in contours
+            cv.approxPolyDP(c, 0.01 * cv.arcLength(c, True), True) for c in contours
         ]
         rects = [cv.boundingRect(p) for p in polygons]
 
@@ -76,13 +76,9 @@ class Preprocessor:
         #         color_idx += 1
         # ecg.save("ecg_rects.png")
 
-
         # rects = self.__filter_large_rectangles(rects, ecg.width, ecg.height)
         # rects = self.__merge_overlapping_rectangles(rects)
-        
 
-        
-        
         # Get largest contour
         sorted_rects = sorted(rects, key=lambda x: x[2] * x[3], reverse=True)
         largest_rect = sorted_rects[0]
@@ -90,7 +86,9 @@ class Preprocessor:
         rect = Rectangle(Point(x, y), Point(x + w, y + h))
         return rect
 
-    def __filter_large_rectangles(self, rects, image_width, image_height, min_area_ratio=0.05):
+    def __filter_large_rectangles(
+        self, rects, image_width, image_height, min_area_ratio=0.05
+    ):
         """
         Elimina rectángulos cuya área sea menor a un porcentaje del área total de la imagen.
 
@@ -106,7 +104,6 @@ class Preprocessor:
         min_area = min_area_ratio * image_width * image_height
         filtered = [r for r in rects if r[2] * r[3] >= min_area]
         return filtered
-
 
     def __merge_overlapping_rectangles(self, rects):
         """
@@ -138,7 +135,7 @@ class Preprocessor:
     def __gridline_removal(self, ecg: Image) -> Image:
         """
         Removes the gridline of an ECG image.
-        
+
         Args:
             ecg (Image): ECG image.
 
@@ -156,10 +153,8 @@ class Preprocessor:
         # OTSU binarization
         threshold = self.__binarize(ecg)
         # Threshold
-        cv.threshold(
-            ecg.data, threshold, ecg.white, cv.THRESH_BINARY
-        )
-        #ecg.threshold(threshold, ecg.white)
+        cv.threshold(ecg.data, threshold, ecg.white, cv.THRESH_BINARY)
+        # ecg.threshold(threshold, ecg.white)
         # Outline borders
         ecg = self.__outline_borders(ecg)
         ecg.to_GRAY()
@@ -170,7 +165,7 @@ class Preprocessor:
         Performs the Otsu's Thresholding algorithm to obtain a single intensity
         threshold that separate pixels into two classes, foreground and background.
         See http://web-ext.u-aizu.ac.jp/course/bmclass/documents/otsu1979.pdf.
-        
+
         Args:
             ecg (Image): ECG image.
 
@@ -223,7 +218,7 @@ class Preprocessor:
             if prop >= 0.95:
                 ecg[:, col] = WHITE
         # Join possible disconnected signals due to space limitations
-        non_white=np.any(ecg[:,:] == 0, axis=1)
+        non_white = np.any(ecg[:, :] == 0, axis=1)
         non_white_idx = np.where(non_white)[0]
         for row in [non_white_idx[0], non_white_idx[-1]]:
             points = np.where(ecg[row, :] == BLACK)[0]

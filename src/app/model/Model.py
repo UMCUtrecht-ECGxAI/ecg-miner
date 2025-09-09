@@ -1,6 +1,8 @@
 # Standard library imports
 from typing import Iterable, Tuple, Optional
+import sys
 
+sys.path.insert(1, "ecg-miner/src/")
 # Application-specific imports
 from utils.ecg.Lead import Lead
 
@@ -67,7 +69,6 @@ class Model:
         """
         self.__rhythm = rhythm
 
-    
     @property
     def rp_at_right(self) -> bool:
         """
@@ -87,7 +88,7 @@ class Model:
             rp_at_right (bool): True if ECG reference pulses are at right False if not.
         """
         self.__rp_at_right = rp_at_right
-    
+
     @property
     def cabrera(self) -> bool:
         """

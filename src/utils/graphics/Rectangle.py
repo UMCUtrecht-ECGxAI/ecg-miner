@@ -3,6 +3,9 @@ from dataclasses import dataclass
 from dataclasses import field
 
 # Application-specific imports
+import sys
+
+sys.path.insert(1, "ecg-miner/src/")
 from utils.graphics.Point import Point
 
 

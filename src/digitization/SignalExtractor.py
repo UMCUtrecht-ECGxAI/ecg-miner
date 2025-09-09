@@ -3,7 +3,9 @@ from math import ceil
 from itertools import groupby
 from operator import itemgetter
 from typing import Iterable
+import sys
 
+sys.path.insert(1, "ecg-miner/src/")
 # Third-party imports
 import numpy as np
 from scipy.signal import find_peaks
@@ -27,7 +29,7 @@ class SignalExtractor:
             n (int): Number of signals to extract.
         """
         self.__n = n
- 
+
     def extract_signals(self, ecg: Image) -> Iterable[Iterable[Point]]:
         """
         Extract the signals of the ECG image.
@@ -37,7 +39,7 @@ class SignalExtractor:
 
         Raises:
             DigitizationError: The indicated number of ROI could not be detected.
-        
+
         Returns:
             Iterable[Iterable[Point]]: List with the list of points of each signal.
         """
@@ -78,7 +80,7 @@ class SignalExtractor:
         # Backtracking
         raw_signals = self.__backtracking(cache, rois)
         return raw_signals
-    
+
     def __get_roi(self, ecg: Image) -> Iterable[int]:
         """
         Get the coordinates of the ROI of the ECG image.
@@ -88,7 +90,7 @@ class SignalExtractor:
 
         Raises:
             DigitizationError: The indicated number of ROI could not be detected.
-        
+
         Returns:
             Iterable[int]: List of row coordinates of the ROI.
         """
@@ -105,14 +107,14 @@ class SignalExtractor:
         peaks, _ = find_peaks(stds, distance=min_distance)
         rois = sorted(peaks, key=lambda x: stds[x], reverse=True)
         if len(rois) < self.__n:
-            raise DigitizationError("The indicated number of rois could not be detected.")
+            raise DigitizationError(
+                "The indicated number of rois could not be detected."
+            )
         rois = rois[0 : self.__n]
         rois = sorted(rois)
         return rois
 
-    def __get_clusters(
-        self, ecg: Image, col: Iterable[int]
-    ) -> Iterable[Iterable[int]]:
+    def __get_clusters(self, ecg: Image, col: Iterable[int]) -> Iterable[Iterable[int]]:
         """
         Get the clusters of a certain column of an ECG. The clusters are
         regions of consecutive black pixels.
@@ -184,9 +186,7 @@ class SignalExtractor:
             roi = rois[roi_i]
             max_len = max([v[roi_i][LEN] for v in cache.values()])
             cand_nodes = [
-                node
-                for node, stats in cache.items()
-                if stats[roi_i][LEN] == max_len
+                node for node, stats in cache.items() if stats[roi_i][LEN] == max_len
             ]
             # Best last point is the one more closer to ROI
             best = min(

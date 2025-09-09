@@ -2,7 +2,9 @@
 import time
 from os.path import basename, dirname, realpath, sep, splitext
 from typing import Iterable, Optional, Tuple
+import sys
 
+sys.path.insert(1, "ecg-miner/src/")
 # Third-party imports
 import numpy as np
 from PyQt5.QtCore import QThreadPool
@@ -283,9 +285,7 @@ class Controller:
         img = self.__load_img(path)
         self.__view.load_ecg(img)
         if img is not None:
-            self.__model.signals_highlighted = (
-                not self.__model.signals_highlighted
-            )
+            self.__model.signals_highlighted = not self.__model.signals_highlighted
             self.__view.set_highlight(self.__model.signals_highlighted)
 
     def proc_cancel_evt(self, cancel: bool) -> None:

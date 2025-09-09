@@ -2,7 +2,9 @@
 from datetime import datetime
 import os
 from typing import Iterable, Optional
+import sys
 
+sys.path.insert(1, "ecg-miner/src/")
 # Third-party imports
 from PyQt5.QtWidgets import (
     QMainWindow,
@@ -47,28 +49,16 @@ class View(QMainWindow):
 
         # Events
         self.layout_cbox.currentIndexChanged.connect(self.__layout_idx_changed)
-        self.rhythm_1_cbox.currentIndexChanged.connect(
-            self.__rhythm_idx_changed
-        )
-        self.rhythm_2_cbox.currentIndexChanged.connect(
-            self.__rhythm_idx_changed
-        )
-        self.rhythm_3_cbox.currentIndexChanged.connect(
-            self.__rhythm_idx_changed
-        )
+        self.rhythm_1_cbox.currentIndexChanged.connect(self.__rhythm_idx_changed)
+        self.rhythm_2_cbox.currentIndexChanged.connect(self.__rhythm_idx_changed)
+        self.rhythm_3_cbox.currentIndexChanged.connect(self.__rhythm_idx_changed)
         self.rp_left_rbttn.toggled.connect(self.__rp_toggled)
         self.rp_right_rbttn.toggled.connect(self.__rp_toggled)
         self.cabrera_chk.stateChanged.connect(self.__cabrera_state_chg)
         self.ocr_chk.stateChanged.connect(self.__ocr_state_chg)
-        self.interpolate_chk.stateChanged.connect(
-            self.__interpolate_state_or_val_chg
-        )
-        self.interpolate_spin.valueChanged.connect(
-            self.__interpolate_state_or_val_chg
-        )
-        self.ecg_name_cbox.currentTextChanged.connect(
-            self.__ecg_selector_curr_txt_chg
-        )
+        self.interpolate_chk.stateChanged.connect(self.__interpolate_state_or_val_chg)
+        self.interpolate_spin.valueChanged.connect(self.__interpolate_state_or_val_chg)
+        self.ecg_name_cbox.currentTextChanged.connect(self.__ecg_selector_curr_txt_chg)
         self.browse_bttn.clicked.connect(self.__browse_clicked)
         self.outpath_bttn.clicked.connect(self.__outpath__clicked)
         self.digitize_bttn.clicked.connect(self.__digitize_clicked)
@@ -78,6 +68,7 @@ class View(QMainWindow):
         # Show
         self.log("SESSION STARTED")
         self.show()
+
     def set_controller(self, controller: "Controller") -> None:
         """
         Set the controller of the app to the view.
@@ -87,7 +78,7 @@ class View(QMainWindow):
         """
         self.controller = controller
         self.restart()
-        
+
     def log(self, msg: str, error: bool = False) -> None:
         """
         Show a message in the log.
@@ -163,9 +154,7 @@ class View(QMainWindow):
         Args:
             enable (bool): True if settings will be enabled False if not.
         """
-        style = (
-            "color: rgb(255,255,255)" if enable else "color: rgb(150,150,150)"
-        )
+        style = "color: rgb(255,255,255)" if enable else "color: rgb(150,150,150)"
         # Layout
         self.layout_lbl.setStyleSheet(style)
         self.layout_cbox.setEnabled(enable)
@@ -233,9 +222,7 @@ class View(QMainWindow):
             leads_selected (Iterable[str]): List with the selected lead in each rhythm strip.
         """
         CBOXES = [self.rhythm_1_cbox, self.rhythm_2_cbox, self.rhythm_3_cbox]
-        ALL_ITEMS = lambda cbox: [
-            cbox.itemText(i) for i in range(cbox.count())
-        ]
+        ALL_ITEMS = lambda cbox: [cbox.itemText(i) for i in range(cbox.count())]
         for idx, cbox in enumerate(CBOXES):
             cbox = CBOXES[idx]
             cbox.blockSignals(True)
@@ -253,9 +240,7 @@ class View(QMainWindow):
         Args:
             enable (bool): True if rhythm strips will be enabled False if not.
         """
-        style = (
-            "color: rgb(255,255,255)" if enable else "color: rgb(150,150,150)"
-        )
+        style = "color: rgb(255,255,255)" if enable else "color: rgb(150,150,150)"
 
         self.rhythm_1_lbl.setStyleSheet(style)
         self.rhythm_2_lbl.setStyleSheet(style)
@@ -277,7 +262,7 @@ class View(QMainWindow):
         Listener invoked when "toggled" event is performed on the "RP radio buttons".
         """
         self.controller.proc_rp_evt(self.rp_right_rbttn.isChecked())
-    
+
     def __cabrera_state_chg(self) -> None:
         """
         Listener invoked when "stateChanged" event is performed on the "Cabrera"
@@ -357,9 +342,7 @@ class View(QMainWindow):
         Listener invoked when "currentTextChanged" event is performed on the
         ECG combobox selector.
         """
-        self.controller.proc_ecg_selected_evt(
-            self.ecg_name_cbox.currentIndex()
-        )
+        self.controller.proc_ecg_selected_evt(self.ecg_name_cbox.currentIndex())
 
     def enable_ecg_selector(self, enable: bool) -> None:
         """

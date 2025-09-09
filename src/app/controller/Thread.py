@@ -1,7 +1,9 @@
 # Standard library imports
 from typing import Callable, Iterable
 from os.path import realpath, sep
+import sys
 
+sys.path.insert(1, "ecg-miner/src/")
 # Third-party imports
 from PyQt5.QtCore import QRunnable, pyqtSlot
 

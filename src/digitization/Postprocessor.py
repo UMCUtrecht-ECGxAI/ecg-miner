@@ -1,7 +1,9 @@
 # Standard library imports
 from collections import defaultdict
 from typing import Iterable, List, Tuple
+import sys
 
+sys.path.insert(1, "ecg-miner/src/")
 # Third-party imports
 import numpy as np
 import pandas as pd
@@ -80,29 +82,22 @@ class Postprocessor:
             the reference pulses of each ECG row.
         """
 
-       
-
         INI, MID, END = (0, 1, 2)
         LIMIT = min([len(signal) for signal in raw_signals])
         PIXEL_EPS = 5
         # Check if ref pulse is at right side or left side of the ECG
         first_pixels = [pulso[-1].y for pulso in raw_signals]
-        direction = (
-            range(-1, -LIMIT, -1) if self.__rp_at_right else range(LIMIT)
-        )
+        direction = range(-1, -LIMIT, -1) if self.__rp_at_right else range(LIMIT)
         pulse_pos = INI
         ini_count = 0
         cut = None
         for i in direction:
             y_coords = [
-                pulso[i].y - ini
-                for pulso, ini in zip(raw_signals, first_pixels)
+                pulso[i].y - ini for pulso, ini in zip(raw_signals, first_pixels)
             ]
             y_coords = sorted(y_coords)
             at_v0 = any([abs(y) <= PIXEL_EPS for y in y_coords])
-            break_symmetry = (pulse_pos == END) and (
-                not at_v0 or ini_count <= 0
-            )
+            break_symmetry = (pulse_pos == END) and (not at_v0 or ini_count <= 0)
             if break_symmetry:
                 cut = i
                 break
@@ -117,21 +112,16 @@ class Postprocessor:
             elif pulse_pos == END:
                 ini_count -= 1
         # Slice signal
-        signal_slice = (
-            slice(0, cut + 1) if self.__rp_at_right else slice(cut, None)
-        )
+        signal_slice = slice(0, cut + 1) if self.__rp_at_right else slice(cut, None)
         signals = [rs[signal_slice] for rs in raw_signals]
         # Slice pulses
-        pulse_slice = (
-            slice(cut + 1, None) if self.__rp_at_right else slice(0, cut + 1)
-        )
+        pulse_slice = slice(cut + 1, None) if self.__rp_at_right else slice(0, cut + 1)
         ref_pulses = [
             sorted(map(lambda p: p.y, rs[pulse_slice]), reverse=True)
             for rs in raw_signals
         ]
         ref_pulses = [
-            (first_pixels[i], ref_pulses[i][-1])
-            for i in range(len(raw_signals))
+            (first_pixels[i], ref_pulses[i][-1]) for i in range(len(raw_signals))
         ]
         return (signals, ref_pulses)
 
@@ -146,7 +136,7 @@ class Postprocessor:
             raw_signals (Iterable[Iterable[Point]]): ECG signals with digital reference pulses.
 
         Returns:
-            Tuple[Iterable[Iterable[Point]], Iterable[Tuple[int, int]]]: 
+            Tuple[Iterable[Iterable[Point]], Iterable[Tuple[int, int]]]:
                 - Cleaned ECG signals (without digital pulses).
                 - List of tuples (y_0mV, y_1mV) per signal.
         """
@@ -175,12 +165,12 @@ class Postprocessor:
             y_1mV = 0
             count = 1
             in_sequence = False
-            min_pulse_width = max(10, 3*k)
+            min_pulse_width = max(10, 3 * k)
 
             for i in range(k + 1, len(points)):
                 if abs(points[i].y - points[i - 1].y) < PIXEL_EPS:
                     count += 1
-                    
+
                     if count == min_pulse_width and y_1mV == 0:
                         y_1mV = points[i].y
                         in_sequence = True
@@ -199,7 +189,7 @@ class Postprocessor:
             # --- Guardar resultados ---
             cleaned_signals.append(cleaned)
             ref_pulses.append((y_0mV, y_1mV))
-        
+
         # Compute median difference between 0mV and 1mV coordinates
         diffs = [pulse[0] - pulse[1] for pulse in ref_pulses]
         median_diff = int(np.median(diffs))
@@ -211,7 +201,7 @@ class Postprocessor:
         # print(ref_pulses)
         # Keep 0mV constant, but compute 1mV as 0mV minus the median diff
         ref_pulses = [(pulse[0], pulse[0] - median_diff) for pulse in ref_pulses]
-        #print(ref_pulses)
+        # print(ref_pulses)
         return cleaned_signals, ref_pulses
 
     def __vectorize(
@@ -241,9 +231,7 @@ class Postprocessor:
         max_diff = max_len % NCOLS
         max_pad = 0 if max_diff == 0 else NCOLS - max_diff
         total_obs = (
-            max_len + max_pad
-            if self.__interpolation is None
-            else self.__interpolation
+            max_len + max_pad if self.__interpolation is None else self.__interpolation
         )
         # Linear interpolation to get a certain number of observations
         interp_signals = np.empty((len(signals), total_obs))

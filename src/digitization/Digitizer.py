@@ -1,7 +1,9 @@
 # Standard library imports
 from os.path import basename, splitext
 from typing import Iterable, Tuple
+import sys
 
+sys.path.insert(1, "ecg-miner/src/")
 # Application-specific imports
 from digitization.MetadataExtractor import MetadataExtractor
 from digitization.SignalExtractor import SignalExtractor
@@ -22,7 +24,7 @@ class Digitizer:
         self,
         layout: Tuple[int, int],
         rhythm: Iterable[Lead],
-        rp_at_right:bool,
+        rp_at_right: bool,
         cabrera: bool,
         outpath: str,
         ocr: bool,
@@ -48,7 +50,7 @@ class Digitizer:
             layout, rhythm, rp_at_right, cabrera, interpolation
         )
         self.__ocr = MetadataExtractor() if ocr else None
-    
+
     def digitize(self, path: str) -> None:
         """
         Digitize an ECG image in paper format.
@@ -66,13 +68,9 @@ class Digitizer:
         # Preprocess
         ecg_crop, rect = self.__preprocessor.preprocess(ecg)
         # Extraction
-        raw_signals = self.__signal_extractor.extract_signals(
-            ecg_crop
-        )
+        raw_signals = self.__signal_extractor.extract_signals(ecg_crop)
         # Postprocess
-        data, trace = self.__postprocessor.postprocess(
-            raw_signals, ecg_crop
-        )
+        data, trace = self.__postprocessor.postprocess(raw_signals, ecg_crop)
         # ECG data
         data.to_csv(f_outpath + ".csv", index=False)
         # ECG tracing
