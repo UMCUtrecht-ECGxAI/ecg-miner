@@ -2,6 +2,8 @@
 from os.path import basename, splitext
 from typing import Iterable, Tuple
 import sys
+import numpy as np
+import PIL
 
 sys.path.insert(1, "ecg-miner/src/")
 # Application-specific imports
@@ -63,24 +65,31 @@ class Digitizer:
         """
         f_name, _ = splitext(basename(path))
         f_outpath = self.__outpath + "/" + f_name
-        ecg = Image(path)
+
+        ecg = Image(path)  # PIL Image
         frame = ecg.copy()
+
+        # Rectangle as a variable: (x, y, w, h)
+        rect = (0, 0, ecg.width, ecg.height)
         # Preprocess
-        ecg_crop, rect = self.__preprocessor.preprocess(ecg)
+        # ecg_crop, rect = self.__preprocessor.preprocess(ecg)
         # Extraction
-        raw_signals = self.__signal_extractor.extract_signals(ecg_crop)
+        raw_signals = self.__signal_extractor.extract_signals(ecg)
         # Postprocess
-        data, trace = self.__postprocessor.postprocess(raw_signals, ecg_crop)
+        data, trace = self.__postprocessor.postprocess(raw_signals, ecg)
         # ECG data
         data.to_csv(f_outpath + ".csv", index=False)
         # ECG tracing
-        tl = rect.top_left
-        br = rect.bottom_right
-        ecg[tl.y : br.y, tl.x : br.x] = trace.data
+        x, y, w, h = rect
+        top_left = (x, y)
+        bottom_right = (x + w, y + h)
+        ecg[top_left[1] : bottom_right[1], top_left[0] : bottom_right[0]] = trace.data
         ecg.save(f_outpath + "_trace" + ".png")
         # ECG metadata
         if self.__ocr is not None:
-            frame[tl.y : br.y, tl.x : br.x] = frame.white
+            frame[top_left[1] : bottom_right[1], top_left[0] : bottom_right[0]] = (
+                frame.white
+            )
             metadata = self.__ocr.extract_metadata(frame)
             with open(f_outpath + "_metadata" + ".txt", "w") as f:
                 f.write(metadata)
